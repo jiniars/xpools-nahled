@@ -80,6 +80,7 @@
 .viz__tabs button[aria-selected="true"] { background: rgba(255, 255, 255, .14); color: #fff; }
 .viz__note { position: absolute; right: 14px; top: 18px; z-index: 3; font: 500 11px/1 var(--font-body); color: rgba(255, 255, 255, .75); background: rgba(5, 8, 15, .55); padding: 6px 9px; border-radius: 6px; }
 
+.viz__collapse, .viz__peek { display: none; }
 .viz__chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
 .viz__chips li { padding: 7px 12px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); font-size: 13.5px; color: var(--text-soft); }
 
@@ -198,27 +199,47 @@
 @media (max-width: 700px) {
   .cfg-page { padding-top: calc(var(--header-h) + 28px); }
   .cfg-head { margin-bottom: 22px; }
-  .viz__stage { aspect-ratio: 4 / 3.4; border-radius: 16px; }
+  /* náhled přilepený pod hlavičkou, jde sbalit do lišty */
+  .cfg__viz { position: sticky; top: var(--header-h); z-index: 6; margin: 0 -16px; padding: 8px 16px 10px; background: var(--bg);
+    box-shadow: 0 12px 16px -14px rgba(0, 0, 0, .45); }
+  .viz__stage { aspect-ratio: 16 / 9; border-radius: 14px; }
+  .viz__chips { display: none; }
+  .viz__collapse { display: grid; place-items: center; position: absolute; top: 10px; right: 10px; z-index: 4; width: 36px; height: 36px; padding: 0;
+    border-radius: 50%; border: 1px solid rgba(255, 255, 255, .18); background: rgba(5, 8, 15, .72); backdrop-filter: blur(10px); color: #fff; cursor: pointer; }
+  .viz__collapse svg, .viz__peek svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+  .viz__peek { align-items: center; gap: 10px; width: 100%; height: 46px; padding: 0 14px; border-radius: 12px; cursor: pointer;
+    border: 1px solid var(--line); background: var(--surface); color: var(--text-strong); font: 600 13px/1 var(--font-head); letter-spacing: .08em; text-transform: uppercase; text-align: left; }
+  .viz__peek span { flex: none; }
+  .viz__peek b { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 400 13px/1 var(--font-body); letter-spacing: 0; text-transform: none; color: var(--muted); }
+  .viz__peek svg:first-child { color: var(--aqua); }
+  .cfg__viz.is-collapsed .viz__stage { display: none; }
+  .cfg__viz.is-collapsed .viz__peek { display: flex; }
   .viz__controls { left: 10px; right: 10px; bottom: 10px; justify-content: space-between; gap: 6px; }
   .seg button { height: 32px; padding: 0 11px; font-size: 11.5px; gap: 5px; }
   .seg button svg { display: none; }
   .viz__tabs { top: 10px; left: 10px; }
   .viz__tabs button { padding: 0 11px; font-size: 11.5px; }
   .viz__note { display: none; }
-  .plan { padding: 50px 6px 56px; }
+  .plan { padding: 44px 6px 46px; }
   .viz__chips li { font-size: 12.5px; padding: 6px 10px; }
   .cfg__body { padding: 22px 16px 4px; min-height: 0; }
   .cfg__title { font-size: 22px; }
   .opts--2, .opts--3 { grid-template-columns: 1fr; }
-  .opts--3:has(.opt:nth-child(6)) { grid-template-columns: 1fr 1fr; }
+  .opts--3:has(.opt:nth-child(4)) { grid-template-columns: 1fr 1fr; }
   .stepper button { padding: 12px 10px 10px; }
   .stepper__label, .stepper button.is-active .stepper__label { display: none; }
-  .cfg__nav { padding: 18px 16px 22px; position: sticky; bottom: 70px; background: var(--surface); border-top: 1px solid var(--line); }
-  .cfg__nav .btn { padding: 0 18px; }
+  /* Zpět / Další napevno dole místo obecné lišty Zavolat / Napsat */
+  .page-konfigurator .mobile-bar { display: none; }
+  body.page-konfigurator { padding-bottom: calc(86px + env(safe-area-inset-bottom)); }
+  .cfg__nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; gap: 10px; padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+    background: var(--overlay-strong); backdrop-filter: blur(12px); border-top: 1px solid var(--line); }
+  .cfg__nav .btn { --h: 50px; padding: 0 16px; }
+  #cfg-next { flex: 1; }
+  #cfg-prev[disabled] { display: none; }
+  .cfg__nav:has(#cfg-next[hidden]) #cfg-prev { flex: 1; }
   .cfg__count { display: none; }
   .summary__block dl div { grid-template-columns: 110px 1fr; }
   .cfg-teaser ul { grid-template-columns: 1fr; }
-  .page-konfigurator .mobile-bar.is-hidden { transform: none; }
 }
 
 /* ---------- barevný vzorek v souhrnu ---------- */

@@ -100,12 +100,11 @@
   ];
 
   const DEFAULT = { mode: 'bazen', type: 'skimmer', material: 'plast', size: '3x6', customW: 3, customL: 6, techPlace: 'sachta',
-    roof: 'stredni-pulkulate', stavba: 'xpools', view: 'venku', time: 'den', tab: 'foto' };
+    roof: 'stredni-pulkulate', stavba: 'xpools', time: 'den', tab: 'foto' };
 
   // polygony vodní hladiny ve fotkách (souřadnice v šířce 1000) – shodné s tools/scenes.py
   const SCENES = {
     venku: { h: 562.5, water: [[79, 331], [366, 303], [853, 372], [657, 563], [443, 563]] },
-    uvnitr: { h: 526.25, water: [[0, 345], [270, 302], [730, 302], [1000, 350], [1000, 458], [0, 458]] },
   };
 
   // projekce venkovní fotky odhadnutá z rohů hladiny (tools/camera.py):
@@ -148,7 +147,6 @@
     if (!materialsFor(s.type).includes(s.material)) s.material = 'plast';
     if (!['3x5', '3x6', '3.5x7', '4x8', 'vlastni'].includes(s.size)) s.size = '3x6';
     if (s.size === 'vlastni' && s.material !== 'folie') s.size = '3x6';
-    if (hasRoof(s)) s.view = 'venku';
     if (!hasPool(s) || isReko(s)) s.tab = 'foto';
     return s;
   }
@@ -227,8 +225,12 @@
     stepId = id;
     renderStepper();
     renderBody();
+    setCollapsed(id === 'odeslat' ? true : userCollapsed);
+    // posun na začátek kroku – na mobilu pod hlavičku a přilepený náhled
     const panel = $('.cfg__panel');
-    if (panel.getBoundingClientRect().top < 0) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const offset = mobile.matches ? $('.header').offsetHeight + $('.cfg__viz').offsetHeight + 8 : 0;
+    const top = panel.getBoundingClientRect().top;
+    if (top < offset) window.scrollTo({ top: window.scrollY + top - offset - (mobile.matches ? 0 : 90), behavior: 'smooth' });
   }
   const goBy = d => { const steps = visibleSteps(); go(steps[Math.max(0, Math.min(steps.length - 1, stepIndex() + d))].id); };
 
@@ -273,22 +275,18 @@
   const stage = $('#viz-stage');
 
   $$('[data-time]').forEach(b => b.addEventListener('click', () => { state.time = b.dataset.time; update(); }));
-  // se zastřešením je vizualizace vždy venkovní
-  const hintEl = $('#viz-hint');
-  let hintTimer;
-  $$('[data-place]').forEach(b => b.addEventListener('click', () => {
-    if (b.dataset.place === state.view) return;
-    if (hasRoof(state)) {
-      hintEl.querySelector('span').textContent = 'Zastřešení se montuje k venkovním bazénům, proto je náhled jen venkovní.';
-      hintEl.hidden = false;
-      clearTimeout(hintTimer);
-      hintTimer = setTimeout(() => { hintEl.hidden = true; }, 5000);
-      return;
-    }
-    state.view = b.dataset.place;
-    update();
-  }));
-  hintEl.querySelector('button').addEventListener('click', () => { hintEl.hidden = true; go('co'); });
+
+  // mobil: náhled je přilepený nahoře a jde sbalit; při vyplňování kontaktu se sbalí sám
+  const mobile = matchMedia('(max-width: 700px)');
+  const vizBox = $('.cfg__viz');
+  let userCollapsed = false;
+  function setCollapsed(on) {
+    vizBox.classList.toggle('is-collapsed', on);
+    $('#viz-collapse').setAttribute('aria-expanded', String(!on));
+    $('#viz-peek').setAttribute('aria-expanded', String(!on));
+  }
+  $('#viz-collapse').addEventListener('click', () => { userCollapsed = true; setCollapsed(true); });
+  $('#viz-peek').addEventListener('click', () => { userCollapsed = false; setCollapsed(false); });
   $$('.viz__tabs [data-tab]').forEach(b => b.addEventListener('click', () => {
     if (b.dataset.tab === 'plan' && (!hasPool(state) || isReko(state))) return;
     state.tab = b.dataset.tab;
@@ -303,19 +301,13 @@
     stage.dataset.tab = state.tab;
     stage.dataset.time = state.time;
     $$('.scene').forEach(sc => {
-      sc.classList.toggle('is-active', sc.dataset.scene === state.view);
+      sc.classList.add('is-active');
       sc.classList.toggle('is-night', state.time === 'noc');
       sc.classList.add('has-lights');
     });
     drawRoof();
     const planOff = !hasPool(state) || isReko(state);
     $$('[data-time]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.time === state.time)));
-    $$('[data-place]').forEach(b => {
-      const on = b.dataset.place === state.view;
-      b.setAttribute('aria-pressed', String(on));
-      b.setAttribute('aria-disabled', String(!on && hasRoof(state)));
-      b.title = !on && hasRoof(state) ? 'Zastřešení je jen pro venkovní bazény' : '';
-    });
     $$('.viz__tabs [data-tab]').forEach(b => {
       b.setAttribute('aria-selected', String(b.dataset.tab === state.tab));
       if (b.dataset.tab === 'plan') b.hidden = planOff;
@@ -324,7 +316,7 @@
 
   // zastřešení do venkovní fotky – 3D model promítnutý kamerou fotky
   function roofMarkup(time) {
-    if (!hasRoof(state) || state.view !== 'venku') return '';
+    if (!hasRoof(state)) return '';
     const R = ROOFS[state.roof];
     const night = time === 'noc';
     const frame = ['#24292F', '#4A525C'];
@@ -487,6 +479,7 @@
     }
     if (hasRoof(state)) items.push(`Zastřešení ${ROOFS[state.roof].label.toLowerCase()}`);
     $('#viz-chips').innerHTML = items.map(t => `<li>${t}</li>`).join('');
+    $('#viz-peek-info').textContent = items.slice(0, 2).join(' · ');
   }
 
   function summaryRows() {
@@ -516,7 +509,7 @@
   }
 
   function configCode() {
-    const str = JSON.stringify({ ...state, time: 0, tab: 0, view: 0 });
+    const str = JSON.stringify({ ...state, time: 0, tab: 0 });
     let h = 0;
     for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
     const d = new Date();
@@ -645,8 +638,8 @@
 
   // složí vizualizaci (fotka + zastřešení) do jednoho obrázku
   async function renderScene(time) {
-    const cfg = SCENES[state.view];
-    const src = `assets/img/konfigurator/${state.view}-${time === 'noc' ? 'noc-svetla' : 'den'}.jpg`;
+    const cfg = SCENES.venku;
+    const src = `assets/img/konfigurator/venku-${time === 'noc' ? 'noc-svetla' : 'den'}.jpg`;
     try {
       const base = await loadImg(src);
       const W = 1600, H = Math.round(W * cfg.h / 1000);
