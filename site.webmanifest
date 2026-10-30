@@ -1,0 +1,11 @@
+{
+  "name": "XPOOLS – prodej a servis bazénů",
+  "short_name": "XPOOLS",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ],
+  "theme_color": "#05080F",
+  "background_color": "#05080F",
+  "display": "standalone"
+}

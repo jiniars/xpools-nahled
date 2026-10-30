@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1333 440" role="img" aria-label="XPOOLS">
+  <title>XPOOLS</title>
+  <defs>
+    
+    <mask id="gap" maskUnits="userSpaceOnUse" x="-50" y="-50" width="1433" height="540">
+      <rect x="-50" y="-50" width="1433" height="540" fill="#fff"/>
+      <polygon points="0,440 175,440 620,0 445,0" fill="#000" stroke="#000" stroke-width="28" stroke-linejoin="miter"/>
+    </mask>
+</defs>
+  <polygon points="55,0 230,0 605,440 430,440" fill="#fff" mask="url(#gap)"/>
+  <path fill-rule="evenodd" fill="#fff" d="M0,440 175,440 620,0 445,0Z M14.6,434 172.53,434 605.4,6 447.47,6Z"/>
+  <polygon points="26.77,429 170.48,429 593.23,11 449.52,11" fill="#fff"/>
+  <path fill-rule="evenodd" fill="#fff" d="M539.51,335 1300.5,335 1333,367.5 1300.5,400 594.91,400Z M552.51,341 1298.01,341 1324.51,367.5 1298.01,394 597.68,394Z"/>
+  <polygon points="563.34,346 1295.94,346 1317.44,367.5 1295.94,389 599.99,389" fill="#fff"/>
+  <g fill="none" stroke="#fff" stroke-width="25"><path d="M517.5,285 V190.5 A18,18 0 0 1 535.5,172.5 H602.5 A18,18 0 0 1 620.5,190.5 V204.5 A18,18 0 0 1 602.5,222.5 H517.5"/><rect x="669.5" y="172.5" width="143" height="100" rx="18"/><rect x="861.5" y="172.5" width="143" height="100" rx="18"/><path d="M1053.5,160 V272.5 H1159" stroke-linejoin="miter"/><path d="M1333,172.5 H1213.5 A18,18 0 0 0 1195.5,190.5 V204.5 A18,18 0 0 0 1213.5,222.5 H1302.5 A18,18 0 0 1 1320.5,240.5 V254.5 A18,18 0 0 1 1302.5,272.5 H1183"/></g>
+  
+</svg>
